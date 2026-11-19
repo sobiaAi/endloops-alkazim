@@ -1,0 +1,173 @@
+@import 'tailwindcss';
+
+/*
+  Brand tokens.
+  Green, teal and navy are sampled from the supplied logo.
+  Blue and purple are kept for small accents later; use them sparingly.
+*/
+@theme {
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #121c2b;        /* dark navy: headings and main text */
+  --color-ink-soft: #4b5565;   /* secondary text */
+  --color-line: #e7e9ee;       /* hairline borders */
+  --color-mist: #f6f7f9;       /* very light grey surfaces */
+  --color-sand: #f3f2ef;       /* warm grey for product cards */
+
+  --color-brand: #0eae6a;      /* logo green */
+  --color-brand-deep: #087a4a; /* darker green for text on white */
+  --color-teal: #0b7a6e;       /* logo teal */
+  --color-blue: #2f6feb;
+  --color-violet: #6e56cf;
+
+  /*
+    Type scale: a 1.25 ratio (16 → 20 → 25 → 31 → 39 → 49),
+    with a fluid display size for the hero headline.
+  */
+  --text-lead: 1.25rem;
+  --text-lead--line-height: 1.6;
+  --text-h3: 1.5625rem;
+  --text-h3--line-height: 1.3;
+  --text-h2: clamp(1.875rem, 1.35rem + 1.6vw, 2.75rem);
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.025em;
+  --text-display: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem); /* 36px on phones → 56px on desktop */
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.03em;
+
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white font-sans text-ink antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand/15 text-ink;
+  }
+}
+
+/*
+  Scroll reveal: sections fade up once as they enter the screen (see Reveal in ui.jsx).
+  Only opacity and transform change, so it stays smooth.
+*/
+.reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.6s var(--ease-glide) var(--delay, 0s),
+    transform 0.6s var(--ease-glide) var(--delay, 0s);
+}
+
+.reveal.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+/* Section rules draw from left to right once, like a line ruled on paper. */
+.rule-draw {
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1s var(--ease-glide) 0.1s;
+}
+
+.is-shown .rule-draw {
+  transform: scaleX(1);
+}
+
+/*
+  Demo panel: the scan line that sweeps over the invoice while "reading".
+  Moved with transform (cheap) rather than `top` (which makes the browser re-layout every frame).
+*/
+.scan-line {
+  animation: scan 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  from {
+    transform: translateY(-4rem);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/*
+  "What we build" flow: the four steps take turns being active (1.2s each, 4.8s cycle).
+  The active step gets a navy border and lifts slightly.
+*/
+.flow-step {
+  animation: step-turn 4.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 1.2s);
+}
+
+@keyframes step-turn {
+  0%,
+  25% {
+    border-color: var(--color-ink);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -14px rgba(18, 28, 43, 0.45);
+  }
+  32%,
+  100% {
+    border-color: var(--color-line);
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Small entrance for messages that appear after an action (errors, confirmations). */
+.fade-in {
+  animation: fade-in 0.35s var(--ease-glide) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-up {
+  animation: fade-up 1.2s var(--ease-glide) var(--delay, 0s) both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .fade-up,
+  .fade-in,
+  .flow-step,
+  .scan-line {
+    animation: none;
+  }
+
+  .reveal,
+  .rule-draw {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
